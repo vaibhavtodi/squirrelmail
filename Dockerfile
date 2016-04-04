@@ -26,7 +26,9 @@ RUN             apt-get             update                                      
                                                                       libapache2-mod-php5                    \
         &&      mkdir               /var/lock/apache2                                                        \
         &&      tar                 -xvzf      squirrelmail-1.4.22.tar.gz                                    \
-        &&      rm                  -f         squirrelmail-1.4.22.tar.gz
+        &&      rm                  -f         squirrelmail-1.4.22.tar.gz                                    \
+        &&      mkdir               /etc/squirrelmail                                                        \
+        &&      mv                  /root/squirrelmail-1.4.22         /etc/squirrelmail
 
 # Clearing the Docker image
 RUN             apt-get             -y         clean                                                         \
