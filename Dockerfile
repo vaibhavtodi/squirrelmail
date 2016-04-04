@@ -1,69 +1,45 @@
 # Specifing the base image
-FROM        vaibhavtodi/debian-java:latest
+FROM            debian:8.3
 
 # Maintainer
-MAINTAINER  "Vaibhav Todi" <vaibhavtodi1989@gmail.com>
+MAINTAINER      "Vaibhav Todi"      <vaibhavtodi1989@gmail.com>
 
 # Specifing the Label
-LABEL       Description="Elasticsearch Docker image"                                                \
-            Version="1.7"
+LABEL           Description="Squirrel Mail Docker image"                                                     \
+                Version="1.0"
 
-# Setting the ENV variable
-ENV         JAVA           /usr/lib/jvm/java-8-oracle
+# Setting the working directory
+WORKDIR         $home
 
-# Downloading & Installing the Elasticsearch package
-RUN         apt-get        update                                                                   \
-       &&   apt-get        install -y wget                                                          \
-       &&   wget    -qO -  https://packages.elastic.co/GPG-KEY-elasticsearch | apt-key add -        \
-       &&   echo           "deb http://packages.elastic.co/elasticsearch/1.7/debian stable main" | tee -a /etc/apt/sources.list.d/elasticsearch-1.7.list \
-       &&   apt-get        update                                                                   \
-       &&   apt-get        install   -y   elasticsearch
+# Setting up the ENV variables for Apache2
+ENV             APACHE_RUN_USER  = www-data               \
+                APACHE_RUN_GROUP = www-data               \
+                APACHE_PID_FILE  = /var/run/apache2.pid   \
+                APACHE_RUN_DIR   = /var/run/apache2       \
+                APACHE_LOCK_DIR  = /var/lock/apache2      \
+                APACHE_LOG_DIR   = /var/log/apache2       \
 
-# Copying the elasticsearch.yml deafult file & entrypoint.sh for running the service
-COPY        elasticsearch.yml       /etc/elasticsearch/elasticsearch.yml
-COPY        entrypoint.sh           /etc/elasticsearch/entrypoint.sh
-
-# Setting up elasticsearch
-RUN         sed -i 's/es_cluster/graylog/'                     /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_node_master/true/'                    /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_node_data/true/'                      /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_no_shards/5/'                         /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_no_replicas/1/'                       /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_conf_path/\/etc\/elasticsearch/'      /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_data_path/\/var\/lib\/elasticsearch/' /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_log_path/\/var\/log\/elasticsearch/'  /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_mlockall/true/'                       /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_network_host/0\.0\.0\.0/'             /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_tcp_port/9300/'                       /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_http_port/9200/'                      /etc/elasticsearch/elasticsearch.yml                    \
-       &&   sed -i 's/es_unicast/["127\.0\.0\.1:9300"]/'       /etc/elasticsearch/elasticsearch.yml
-
-RUN         for path in                                                                             \
-                /var/lib/elasticsearch                                                              \
-                /var/log/elasticsearch                                                              \
-                /etc/elasticsearch                                                                  \
-                /var/run/elasticsearch                                                              \
-                /usr/share/elasticsearch                                                            \
-            ; do \
-                chown -R elasticsearch:elasticsearch "$path";                                       \
-            done
+# Downloading & Installing the squirrelmail Package
+RUN             apt-get             update                                                                   \
+        &&      DEBIAN_FRONTEND=noninteractive apt-get   install  -y  wget  curl  vim  apache2               \
+                                                                      libapache2-mod-php5                    \
+        &&      mkdir               /var/lock/apache2                                                        \
+        &&      tar                 -xvzf      squirrelmail-1.4.22.tar.gz                                    \
+        &&      rm                  -f         squirrelmail-1.4.22.tar.gz
 
 # Clearing the Docker image
-RUN         apt-get   -y    clean                                                                   \
-       &&   rm        -rf   /var/lib/apt/lists/*                                                    \
-       &&   rm        -rf   /var/cache/*
+RUN             apt-get             -y         clean                                                         \
+        &&      rm                  -rf        /var/lib/apt/lists/*                                          \
+        &&      rm                  -rf        /var/cache/*
 
-# Setting the passwd for root
-RUN         echo      "root:root"    |   chpasswd
+# Copying the entrypoint.sh
+COPY            entrypoint.sh       /entrypoint.sh
 
 # Exposing the Ports
-EXPOSE      9200       9300
+EXPOSE          80
 
 # Mounting the log & data directory
-VOLUME      ["/var/lib/elasticsearch", "/var/log/elasticsearch", "/etc/elasticsearch"]
-
-# Changing the User
-USER        elasticsearch
+VOLUME          ["/etc/squirrelmail, /etc/apache2, /var/log/apache2, /var/log/squirrelmail"]
 
 # Specifing the entrypoint
-CMD         ["/etc/elasticsearch/entrypoint.sh"]
+CMD             ["/entrypoint.sh"]
