@@ -9,6 +9,7 @@ LABEL           Description="Squirrel Mail Docker image"                        
                 Version="1.0"
 
 # Setting the working directory
+ENV             home                /root
 WORKDIR         $home
 
 # Setting up the ENV variables for Apache2
