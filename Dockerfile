@@ -24,11 +24,8 @@ ENV             APACHE_RUN_USER  = www-data               \
 RUN             apt-get             update                                                                   \
         &&      DEBIAN_FRONTEND=noninteractive apt-get   install  -y  wget  curl  vim  apache2               \
                                                                       libapache2-mod-php5                    \
+                                                                      squirrelmail                           \
         &&      mkdir               /var/lock/apache2                                                        \
-        &&      tar                 -xvzf      squirrelmail-1.4.22.tar.gz                                    \
-        &&      rm                  -f         squirrelmail-1.4.22.tar.gz                                    \
-        &&      mkdir               /etc/squirrelmail                                                        \
-        &&      mv                  /root/squirrelmail-1.4.22         /etc/squirrelmail
 
 # Clearing the Docker image
 RUN             apt-get             -y         clean                                                         \
