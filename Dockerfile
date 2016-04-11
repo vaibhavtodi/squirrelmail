@@ -32,6 +32,9 @@ RUN             apt-get             -y         clean                            
         &&      rm                  -rf        /var/lib/apt/lists/*                                          \
         &&      rm                  -rf        /var/cache/*
 
+# Copying the Default Apache COnfiguration file  for Squirrelmail
+COPY            def_apache.conf     /etc/squirrelmail/apache.conf
+
 # Copying the entrypoint.sh
 COPY            entrypoint.sh       /entrypoint.sh
 
@@ -39,7 +42,7 @@ COPY            entrypoint.sh       /entrypoint.sh
 EXPOSE          80
 
 # Mounting the log & data directory
-VOLUME          ["/etc/squirrelmail, /etc/apache2, /var/log/apache2, /var/log/squirrelmail"]
+VOLUME          ["/etc/squirrelmail, /var/lib/squirrelmail, /etc/apache2, /var/log/apache2"]
 
 # Specifing the entrypoint
 CMD             ["/entrypoint.sh"]
